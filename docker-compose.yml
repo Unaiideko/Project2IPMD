@@ -1,0 +1,64 @@
+version: '3'
+services:
+  namenode:
+    image: hadoop-hdfs
+    container_name: namenode
+    hostname: namenode
+    ports:
+      - "9000:9000"
+      - "50070:50070"
+    volumes:
+      - namenode-data:/opt/hadoop/data/namenode
+    networks:
+      - hadoop-net
+
+  datanode:
+    image: hadoop-hdfs
+    container_name: datanode
+    hostname: datanode
+    volumes:
+      - datanode-data:/opt/hadoop/data/datanode
+    networks:
+      - hadoop-net
+
+  resourcemanager:
+    image: hadoop-hdfs
+    container_name: resourcemanager
+    hostname: resourcemanager
+    ports:
+      - "8088:8088"
+    networks:
+      - hadoop-net
+
+  metastore:
+    image: hadoop-hive
+    container_name: metastore
+    hostname: metastore
+    ports:
+      - "9083:9083"
+    networks:
+      - hadoop-net
+
+  hive-server:
+    build: .
+    container_name: hive-server
+    hostname: hive-server
+    ports:
+      - "10000:10000"
+    networks:
+      - hadoop-net
+    depends_on:
+      - namenode
+      - datanode
+      - resourcemanager
+      - metastore
+    command: "/opt/hive/scripts/start-hive.sh"
+
+networks:
+  hadoop-net:
+    driver: bridge
+
+volumes:
+  namenode-data:
+  datanode-data:
+
