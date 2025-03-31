@@ -1,0 +1,75 @@
+<configuration>
+    <!-- Conexión al metastore -->
+    <property>
+        <name>hive.metastore.uris</name>
+        <value>thrift://hive-metastore:9083</value>
+        <description>URI del Hive metastore</description>
+    </property>
+    
+    <!-- Ubicación del warehouse en HDFS -->
+    <property>
+        <name>hive.metastore.warehouse.dir</name>
+        <value>/user/hive/warehouse</value>
+        <description>Directorio donde Hive almacena tablas por defecto</description>
+    </property>
+    
+    <!-- Configuración de HiveServer2 -->
+    <property>
+        <name>hive.server2.thrift.port</name>
+        <value>10000</value>
+        <description>Puerto para el servicio HiveServer2</description>
+    </property>
+    
+    <property>
+        <name>hive.server2.thrift.bind.host</name>
+        <value>hive</value>
+        <description>Nombre del host para HiveServer2</description>
+    </property>
+    
+    <!-- Configuración para clientes Beeline -->
+    <property>
+        <name>hive.server2.enable.doAs</name>
+        <value>false</value>
+        <description>No usar el usuario del cliente para operaciones HDFS</description>
+    </property>
+    
+    <!-- Configuración para procesar consultas -->
+    <property>
+        <name>hive.execution.engine</name>
+        <value>mr</value>
+        <description>Motor de ejecución (MapReduce)</description>
+    </property>
+    
+    <!-- Permitir operaciones de creación en HDFS -->
+    <property>
+        <name>hive.exec.dynamic.partition</name>
+        <value>true</value>
+        <description>Permitir particionamiento dinámico</description>
+    </property>
+    
+    <property>
+        <name>hive.exec.dynamic.partition.mode</name>
+        <value>nonstrict</value>
+        <description>Permitir particionamiento dinámico en modo no estricto</description>
+    </property>
+    
+    <!-- Configuración de directorios temporales -->
+    <property>
+        <name>hive.exec.scratchdir</name>
+        <value>/tmp/hive</value>
+        <description>Directorio temporal para Hive</description>
+    </property>
+    
+    <property>
+        <name>hive.querylog.location</name>
+        <value>/tmp/hive/querylog</value>
+        <description>Ubicación de los logs de consultas</description>
+    </property>
+    
+    <!-- Soporte de formatos -->
+    <property>
+        <name>hive.aux.jars.path</name>
+        <value>/opt/hive/lib/hive-hcatalog-core.jar</value>
+        <description>JARs auxiliares para procesamiento de formatos especiales como AVRO</description>
+    </property>
+</configuration>

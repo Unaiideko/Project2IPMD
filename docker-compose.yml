@@ -1,64 +1,117 @@
-version: '3'
 services:
   namenode:
-    image: hadoop-hdfs
+    image: bde2020/hadoop-namenode:2.0.0-hadoop3.2.1-java8
     container_name: namenode
-    hostname: namenode
+    environment:
+      - CLUSTER_NAME=test
     ports:
-      - "9000:9000"
-      - "50070:50070"
+      - "9870:9870"
+      - "8020:8020"
     volumes:
-      - namenode-data:/opt/hadoop/data/namenode
+      - ./data/namenode:/opt/hadoop/data/namenode
+      - ./config/core-site.xml:/opt/hadoop/etc/hadoop/core-site.xml
+      - ./config/hdfs-site.xml:/opt/hadoop/etc/hadoop/hdfs-site.xml
     networks:
-      - hadoop-net
+      - hadoop
 
   datanode:
-    image: hadoop-hdfs
+    build:
+      context: .
+      dockerfile: Dockerfile.datanode
     container_name: datanode
-    hostname: datanode
+    environment:
+      - CLUSTER_NAME=test
+    depends_on:
+      - namenode
     volumes:
-      - datanode-data:/opt/hadoop/data/datanode
+      - ./data/datanode:/opt/hadoop/data/datanode
+      - ./config/core-site.xml:/opt/hadoop/etc/hadoop/core-site.xml
+      - ./config/hdfs-site.xml:/opt/hadoop/etc/hadoop/hdfs-site.xml
     networks:
-      - hadoop-net
+      - hadoop
 
-  resourcemanager:
-    image: hadoop-hdfs
-    container_name: resourcemanager
-    hostname: resourcemanager
-    ports:
-      - "8088:8088"
-    networks:
-      - hadoop-net
-
-  metastore:
-    image: hadoop-hive
-    container_name: metastore
-    hostname: metastore
+  hive-metastore:
+    image: bde2020/hive-metastore-postgresql:2.3.0
+    container_name: hive-metastore
+    environment:
+      - POSTGRES_USER=hive
+      - POSTGRES_PASSWORD=hive
+      - POSTGRES_DB=metastore
     ports:
       - "9083:9083"
     networks:
-      - hadoop-net
+      - hadoop
 
-  hive-server:
-    build: .
-    container_name: hive-server
-    hostname: hive-server
-    ports:
-      - "10000:10000"
-    networks:
-      - hadoop-net
+  hive:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: hive
+    environment:
+      - HIVE_METASTORE_URI=thrift://hive-metastore:9083
     depends_on:
       - namenode
       - datanode
-      - resourcemanager
-      - metastore
-    command: "/opt/hive/scripts/start-hive.sh"
+      - hive-metastore
+    ports:
+      - "10000:10000"
+    volumes:
+      - ./userdata:/data/userdata
+      - ./scripts:/scripts
+      - ./config/core-site.xml:/opt/hadoop/etc/hadoop/core-site.xml
+      - ./config/hdfs-site.xml:/opt/hadoop/etc/hadoop/hdfs-site.xml
+    networks:
+      - hadoop
+
+  mysql:
+    image: mysql:8.0
+    container_name: mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: hive_summary
+      MYSQL_USER: grafana
+      MYSQL_PASSWORD: grafana
+    ports:
+      - "3306:3306"
+    networks:
+      - hadoop
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    depends_on:
+      - mysql
+    networks:
+      - hadoop
+
+  initializer:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: initializer
+    depends_on:
+      - namenode
+      - datanode
+      - hive
+      - mysql
+    volumes:
+      - ./scripts:/scripts
+      - ./userdata:/data/userdata
+    command: >
+      /bin/bash -c "
+        sleep 30 &&
+        /scripts/init-hdfs.sh &&
+        /scripts/init-hive.sh &&
+        /scripts/hdfs-to-mysql.sh
+      "
+    networks:
+      - hadoop
 
 networks:
-  hadoop-net:
+  hadoop:
     driver: bridge
-
-volumes:
-  namenode-data:
-  datanode-data:
-
