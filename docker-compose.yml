@@ -30,25 +30,39 @@ services:
     networks:
       - hadoop
 
-  hive-metastore:
-    image: bde2020/hive-metastore-postgresql:2.3.0
-    container_name: hive-metastore
+  postgres:
+    image: postgres:12
+    container_name: postgres
     environment:
       - POSTGRES_USER=hive
       - POSTGRES_PASSWORD=hive
       - POSTGRES_DB=metastore
+    volumes:
+      - ./metastore-config/init-postgres.sql:/docker-entrypoint-initdb.d/init-postgres.sql
+    networks:
+      - hadoop
+
+  hive-metastore:
+    image: bde2020/hive:2.3.2-postgresql-metastore
+    container_name: hive-metastore
+    environment:
+      - HIVE_SITE_CONF_javax_jdo_option_ConnectionURL=jdbc:postgresql://postgres:5432/metastore
+      - HIVE_SITE_CONF_javax_jdo_option_ConnectionDriverName=org.postgresql.Driver
+      - HIVE_SITE_CONF_javax_jdo_option_ConnectionUserName=hive
+      - HIVE_SITE_CONF_javax_jdo_option_ConnectionPassword=hive
+    depends_on:
+      - postgres
+    command: /opt/hive/bin/hive --service metastore
     ports:
       - "9083:9083"
     networks:
       - hadoop
-
+    
   hive:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.hive
     container_name: hive
-    environment:
-      - HIVE_METASTORE_URI=thrift://hive-metastore:9083
     depends_on:
       - namenode
       - datanode
@@ -57,9 +71,9 @@ services:
       - "10000:10000"
     volumes:
       - ./userdata:/data/userdata
-      - ./scripts:/scripts
       - ./config/core-site.xml:/opt/hadoop/etc/hadoop/core-site.xml
       - ./config/hdfs-site.xml:/opt/hadoop/etc/hadoop/hdfs-site.xml
+      - ./config/hive-site.xml:/opt/hive/conf/hive-site.xml
     networks:
       - hadoop
 
@@ -102,13 +116,7 @@ services:
     volumes:
       - ./scripts:/scripts
       - ./userdata:/data/userdata
-    command: >
-      /bin/bash -c "
-        sleep 30 &&
-        /scripts/init-hdfs.sh &&
-        /scripts/init-hive.sh &&
-        /scripts/hdfs-to-mysql.sh
-      "
+      - ./config/core-site.xml:/opt/hadoop/etc/hadoop/core-site.xml
     networks:
       - hadoop
 
