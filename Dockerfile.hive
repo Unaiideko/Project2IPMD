@@ -5,4 +5,7 @@ COPY scripts/ /scripts/
 RUN chmod +x /scripts/*.sh
 
 # Mantener el entrypoint original
-ENTRYPOINT ["/entrypoint.sh"]
+ENTRYPOINT ["entrypoint.sh"]
+
+#Mantener contenedor activo 
+CMD ["tail", "-f", "/dev/null"]

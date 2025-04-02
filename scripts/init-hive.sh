@@ -1,4 +1,11 @@
 #!/bin/bash
+# Crear el directorio .beeline si no existe
+if [ ! -d "/home/hive/.beeline" ]; then
+  mkdir -p /home/hive/.beeline
+  chown hive:hive /home/hive/.beeline
+  chmod 700 /home/hive/.beeline
+fi
+
 # Crear tabla en Hive y procesar datos
 beeline -u jdbc:hive2://hive:10000 -e "
 CREATE EXTERNAL TABLE usuarios

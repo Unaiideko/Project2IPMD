@@ -57,25 +57,48 @@ services:
       - "9083:9083"
     networks:
       - hadoop
-    
   hive:
-    build:
-      context: .
-      dockerfile: Dockerfile.hive
+    image: apache/hive:3.1.3
     container_name: hive
+    environment:
+      - SERVICE_NAME=hiveserver2
     depends_on:
-      - namenode
-      - datanode
-      - hive-metastore
-    ports:
-      - "10000:10000"
+     - namenode
+     - datanode
+     - hive-metastore
     volumes:
       - ./userdata:/data/userdata
       - ./config/core-site.xml:/opt/hadoop/etc/hadoop/core-site.xml
       - ./config/hdfs-site.xml:/opt/hadoop/etc/hadoop/hdfs-site.xml
       - ./config/hive-site.xml:/opt/hive/conf/hive-site.xml
+      - ./process_hive_data.sh:/scripts/init-hive.sh
+    ports:
+      - "10000:10000"
+
     networks:
       - hadoop
+    restart: always # Opcional, para reiniciar el contenedor en caso de fallo
+    stdin_open: true # Opcional, mantener la entrada abierta
+    tty: true        # Opcional, mantener el contenedor en ejecución
+  
+  # hive:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile.hive
+  #   container_name: hive
+  #   depends_on:
+  #     - namenode
+  #     - datanode
+  #     - hive-metastore
+  #   ports:
+  #     - "10000:10000"
+  #   volumes:
+  #     - ./userdata:/data/userdata
+  #     - ./config/core-site.xml:/opt/hadoop/etc/hadoop/core-site.xml
+  #     - ./config/hdfs-site.xml:/opt/hadoop/etc/hadoop/hdfs-site.xml
+  #     - ./config/hive-site.xml:/opt/hive/conf/hive-site.xml
+  #   networks:
+  #     - hadoop
 
   mysql:
     image: mysql:8.0
@@ -103,22 +126,7 @@ services:
     networks:
       - hadoop
 
-  initializer:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: initializer
-    depends_on:
-      - namenode
-      - datanode
-      - hive
-      - mysql
-    volumes:
-      - ./scripts:/scripts
-      - ./userdata:/data/userdata
-      - ./config/core-site.xml:/opt/hadoop/etc/hadoop/core-site.xml
-    networks:
-      - hadoop
+  
 
 networks:
   hadoop:
