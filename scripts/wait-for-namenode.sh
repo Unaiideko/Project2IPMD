@@ -7,9 +7,8 @@ while [ $ATTEMPT -lt $MAX_ATTEMPTS ]; do
   ATTEMPT=$((ATTEMPT+1))
   echo "Intento $ATTEMPT de $MAX_ATTEMPTS..."
   
-  # Intentar conectarse al NameNode
-  nc -z namenode 8020 >/dev/null 2>&1
-  if [ $? -eq 0 ]; then
+  # Verificar si el NameNode está disponible
+  if timeout 1 bash -c "</dev/tcp/namenode/8020" 2>/dev/null; then
     echo "¡Conexión establecida con el NameNode!"
     break
   fi
@@ -18,5 +17,5 @@ while [ $ATTEMPT -lt $MAX_ATTEMPTS ]; do
   sleep 5
 done
 
-# Ejecutar el entrypoint original
-exec /entrypoint.sh
+# Ejecutar el datanode
+exec hdfs datanode

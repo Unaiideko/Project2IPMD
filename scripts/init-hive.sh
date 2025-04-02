@@ -1,31 +1,48 @@
 #!/bin/bash
-# Crear el directorio .beeline si no existe
-if [ ! -d "/home/hive/.beeline" ]; then
-  mkdir -p /home/hive/.beeline
-  chown hive:hive /home/hive/.beeline
-  chmod 700 /home/hive/.beeline
-fi
+set -e
 
-# Crear tabla en Hive y procesar datos
-beeline -u jdbc:hive2://hive:10000 -e "
-CREATE EXTERNAL TABLE usuarios
-STORED AS AVRO
-LOCATION 'hdfs://namenode:8020/user/hive/avro_data/'
-TBLPROPERTIES ('avro.schema.url'='hdfs://namenode:8020/user/hive/avro_data/userdata.avsc');
+echo "Iniciando procesamiento de datos en Hive..."
 
-CREATE EXTERNAL TABLE summary (
+# Conectar a Hive y ejecutar comandos SQL
+beeline -u jdbc:hive2://hive:10000 << EOF
+-- Crear la base de datos si no existe
+CREATE DATABASE IF NOT EXISTS default;
+USE default;
+
+-- Crear la tabla para los datos AVRO
+DROP TABLE IF EXISTS usuarios;
+CREATE EXTERNAL TABLE usuarios (
+  id INT,
+  first_name STRING,
+  last_name STRING,
+  email STRING,
+  gender STRING,
+  ip_address STRING,
+  cc STRING,
   country STRING,
-  user_count INT
+  birthdate STRING,
+  salary FLOAT,
+  title STRING,
+  comments STRING
 )
-ROW FORMAT DELIMITED FIELDS TERMINATED BY ','
-STORED AS TEXTFILE
-LOCATION 'hdfs://namenode:8020/user/hive/summary';
+STORED AS AVRO
+LOCATION 'hdfs:///user/hive/avro_data/';
 
-INSERT OVERWRITE TABLE summary
-SELECT country, COUNT(*) AS user_count
+-- Crear tabla resumen por país
+DROP TABLE IF EXISTS summary;
+CREATE TABLE summary AS
+SELECT 
+  country,
+  COUNT(*) AS user_count,
+  AVG(salary) AS avg_salary,
+  MIN(salary) AS min_salary,
+  MAX(salary) AS max_salary
 FROM usuarios
-GROUP BY country
-ORDER BY user_count DESC;
-"
+GROUP BY country;
 
-echo "Procesamiento Hive completado"
+-- Verificar resultados
+SELECT * FROM summary LIMIT 10;
+EOF
+
+echo "Procesamiento de datos completado con éxito."
+exit 0
