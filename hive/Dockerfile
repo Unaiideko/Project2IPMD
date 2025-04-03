@@ -22,11 +22,7 @@ USER hive
 COPY hive/init_hive.sql init_hive.sql
 COPY userdata /app/userdata 
 
-# Copiar el archivo pom.xml para instalar dependencias Maven
-COPY hive/pom.xml /opt/hive/pom.xml
 
-# Ejecutar Maven para instalar dependencias
-RUN mvn clean install -f /opt/hive/pom.xml
 
 # Añadir configuración adicional de Hive si es necesario
 # ADD hive/hive-site.xml /opt/hive/conf/hive-site.xml
