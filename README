@@ -6,12 +6,22 @@ En un inicio, se deslegarán los servicios necesarios para la práctica por medi
 ## Procedimiento para cargar los ficheros AVRO en Apache Hive
 Tras el despliegue, se habrá de abrir un bash en el contenedor de Hive usando Beeline, de la siguiente manera: 
 ```
-docker exec -it hive-server2 bash
-beeline -u jdbc:hive2://localhost:10000
-```
-Habremos de crear un nuevo esquema para los fichero AVRO: 
-```
-CREATE TABLE datos (
+>>>docker exec -it hive bash
+
+
+>>>hadoop fs -mkdir -p /user/hive/warehouse/usuarios
+
+
+>>>hadoop fs -put /data/userdata/*.avro /user/hive/warehouse/usuarios/
+
+>>>hadoop fs -chmod -R 777 /user/hive/warehouse/usuarios
+
+>>>beeline
+
+>>>!connect jdbc:hive2://localhost:10000
+
+
+>>>CREATE EXTERNAL TABLE datos (
     registration_dttm STRING,
     id BIGINT,
     first_name STRING,
@@ -26,86 +36,7 @@ CREATE TABLE datos (
     title STRING,
     comments STRING
 )
-STORED AS AVRO;
-```
-Cargar los ficheros AVRO a Hive: 
-```
-hadoop fs -put \Project2IPMD-main\userdata /user/hive/warehouse/
-```
-Y posteriormente, cargar la tabla en Hive:
-```
-LOAD DATA INPATH 'hdfs:/path_puesto' INTO TABLE datos;
-
-```
-Crear la tabla resumen en Hive:
-
-```
-CREATE TABLE summary (
-   registration_dttm STRING,
-    id BIGINT,
-    first_name STRING,
-    last_name STRING,
-    email STRING,
-    gender STRING,
-    ip_address STRING,
-    cc BIGINT,
-    country STRING,
-    birthdate STRING,
-    salary DOUBLE,
-    title STRING,
-    comments STRING
-)
-ROW FORMAT DELIMITED
-FIELDS TERMINATED BY ','
-STORED AS TEXTFILE;
-```
-Y volcarla a nuestro contenedor MySQL:
-
-```
-from pyhive import hive
-import mysql.connector
-
-# Conexión a Hive
-conn_hive = hive.Connection(host='hive_host', port=10000, username='hive_user', database='default')
-cursor_hive = conn_hive.cursor()
-cursor_hive.execute("SELECT * FROM summary")
-
-# Conexión a MySQL
-conn_mysql = mysql.connector.connect(
-    host="mysql_host",
-    user="mysql_user",
-    password="mysql_password",
-    database="mysql_database"
-)
-cursor_mysql = conn_mysql.cursor()
-
-# Insertar los datos en MySQL
-for row in cursor_hive.fetchall():
-    pais, numero_usuarios = row
-    cursor_mysql.execute("INSERT INTO summary (pais, numero_usuarios) VALUES (%s, %s)", (pais, numero_usuarios))
-
-conn_mysql.commit()
-cursor_hive.close()
-cursor_mysql.close()
-conn_hive.close()
-conn_mysql.close()
-
-```
-Y por último, crearemos un panel en Grafana con la tabla de MySQL como base de datos, utilizando como consultas, las siguientes: 
-1. 10 países con más usuarios
-```
-SELECT country, COUNT(id) AS numero_usuarios
-FROM summary
-GROUP BY country
-ORDER BY numero_usuarios DESC
-LIMIT 10;
-
-```
-2. Distribución de Sueldos Promedio por País
-```
-SELECT country, AVG(salary) AS salario_promedio
-FROM summary
-GROUP BY country
-ORDER BY salario_promedio DESC;
+STORED AS AVRO
+LOCATION 'hdfs:///user/hive/warehouse/usuarios';
 
 ```
