@@ -15,7 +15,7 @@
     <name>hive.metastore.uris</name>
     <value>thrift://hive-metastore:9083</value>
   </property>
-  </property>
+  <property>  <!-- Fix starts here -->
     <name>hive.execution.engine</name>
     <value>mr</value>
   </property>
