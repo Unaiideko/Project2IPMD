@@ -47,3 +47,5 @@ TBLPROPERTIES ('avro.schema.url'='hdfs:///user/hive/schemas/userdata.avsc');
 >>>cd mysql_connector
 >>>docker build -t mysql_connector .
 >>>docker run --name=ejecutor --network=project2ipmd_hadoop -e MYSQL_HOST=mysql mysql_connector
+
+>>>docker run -d --name=grafana --network=project2ipmd_hadoop -p 3000:3000 grafana/grafana
