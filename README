@@ -8,6 +8,7 @@ Tras el despliegue, se habrá de abrir un bash en el contenedor de Hive usando B
 ```
 >>>docker exec -it namenode /scripts/init-hdfs.sh
 
+docker cp ./config/hive-site.xml hive:/opt/hive/conf/hive-site.xml
 
 >>>docker exec -it hive beeline -u jdbc:hive2://localhost:10000/
 
@@ -33,9 +34,9 @@ TBLPROPERTIES ('avro.schema.url'='hdfs:///user/hive/schemas/userdata.avsc');
 #Comprobar que se hayan creado los datos
 >>>SELECT * FROM usuarios LIMIT 10;
 
->>>CREATE TABLE IF NOT EXISTS summary AS
-SELECT country, COUNT(*) AS user_count
-FROM usuarios
-GROUP BY country
-ORDER BY user_count DESC
-LIMIT 10;
+docker exec -it mysql mysql -u root -p
+
+CREATE DATABASE hive_summary;
+
+dependencias 
+ejercutar el python main.py

@@ -1,0 +1,2 @@
+echo "pyhive" > requirements.txt
+echo "mysql-connector-python" >> requirements.txt

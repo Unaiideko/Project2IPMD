@@ -1,22 +1,18 @@
 <configuration>
-  <property>
-    <name>hive.server2.thrift.bind.host</name>
-    <value>0.0.0.0</value>
-  </property>
-  <property>
-    <name>hive.server2.thrift.port</name>
-    <value>10000</value>
-  </property>
-  <property>
-    <name>hive.server2.enable.doAs</name>
-    <value>false</value>
-  </property>
-  <property>
-    <name>hive.metastore.uris</name>
-    <value>thrift://hive-metastore:9083</value>
-  </property>
-  <property>  <!-- Fix starts here -->
-    <name>hive.execution.engine</name>
-    <value>mr</value>
-  </property>
+    <property>
+        <name>hive.execution.engine</name>
+        <value>tez</value>
+    </property>
+    <property>
+        <name>hive.tez.container.size</name>
+        <value>1024</value>
+    </property>
+    <property>
+        <name>hive.tez.java.opts</name>
+        <value>-Xmx768m</value>
+    </property>
+    <property>
+        <name>hive.tez.graph.dag.timeout</name>
+        <value>300000</value>
+    </property>
 </configuration>
