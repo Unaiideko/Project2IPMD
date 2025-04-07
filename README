@@ -6,23 +6,13 @@ En un inicio, se deslegarán los servicios necesarios para la práctica por medi
 ## Procedimiento para cargar los ficheros AVRO en Apache Hive
 Tras el despliegue, se habrá de abrir un bash en el contenedor de Hive usando Beeline, de la siguiente manera: 
 ```
->>>docker exec -it hive bash
+>>>docker exec -it namenode /scripts/init-hdfs.sh
 
 
->>>hadoop fs -mkdir -p /user/hive/warehouse/usuarios
+>>>docker exec -it hive beeline -u jdbc:hive2://localhost:10000/
 
 
->>>hadoop fs -put /data/userdata/*.avro /user/hive/warehouse/usuarios/
-
->>>hadoop fs -chmod -R 777 /user/hive/warehouse/usuarios
-
->>>beeline
-
->>>!connect jdbc:hive2://localhost:10000
-
-
->>>CREATE EXTERNAL TABLE datos (
-    registration_dttm STRING,
+>>>CREATE EXTERNAL TABLE IF NOT EXISTS usuarios (
     id BIGINT,
     first_name STRING,
     last_name STRING,
@@ -37,6 +27,15 @@ Tras el despliegue, se habrá de abrir un bash en el contenedor de Hive usando B
     comments STRING
 )
 STORED AS AVRO
-LOCATION 'hdfs://user/hive/warehouse/usuarios';
+LOCATION 'hdfs:///user/hive/warehouse/usuarios'
+TBLPROPERTIES ('avro.schema.url'='hdfs:///user/hive/schemas/userdata.avsc');
 
-```
+#Comprobar que se hayan creado los datos
+>>>SELECT * FROM usuarios LIMIT 10;
+
+>>>CREATE TABLE IF NOT EXISTS summary AS
+SELECT country, COUNT(*) AS user_count
+FROM usuarios
+GROUP BY country
+ORDER BY user_count DESC
+LIMIT 10;
