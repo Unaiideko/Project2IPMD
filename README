@@ -49,3 +49,24 @@ TBLPROPERTIES ('avro.schema.url'='hdfs:///user/hive/schemas/userdata.avsc');
 >>>docker run --name=ejecutor --network=project2ipmd_hadoop -e MYSQL_HOST=mysql mysql_connector
 
 >>>docker run -d --name=grafana --network=project2ipmd_hadoop -p 3000:3000 grafana/grafana
+
+
+Acceder a internet: http://localhost:3000
+
+user & pass= admin
+
+>>>Engranaje y add data source
+
+Host: mysql:3306 (esto hace referencia al contenedor MySQL en tu red Docker).
+
+Database: hive_summary (el nombre de la base de datos que creaste anteriormente).
+
+User: grafana (usuario configurado en tu contenedor de MySQL).
+
+Password: grafana (contraseña configurada en tu contenedor de MySQL).
+
+
+Dashboard>Add new panel
+
+Query>>> SELECT country, user_count FROM datos;
+
