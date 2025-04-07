@@ -38,5 +38,6 @@ docker exec -it mysql mysql -u root -p
 
 CREATE DATABASE hive_summary;
 
-dependencias 
-ejercutar el python main.py
+>>>cd mysql_connector
+>>>docker build -t mysql_connector .
+>>>docker run --name=ejecutor --network=project2ipmd_hadoop -e MYSQL_HOST=mysql mysql_connector
