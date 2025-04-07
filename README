@@ -37,6 +37,6 @@ Tras el despliegue, se habrá de abrir un bash en el contenedor de Hive usando B
     comments STRING
 )
 STORED AS AVRO
-LOCATION 'hdfs:///user/hive/warehouse/usuarios';
+LOCATION 'hdfs://user/hive/warehouse/usuarios';
 
 ```

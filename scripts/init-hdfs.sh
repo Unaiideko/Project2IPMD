@@ -1,26 +1,23 @@
 #!/bin/bash
-echo "Creating hdfs project structure..."
-
+echo "Creating HDFS project structure..."
 # Crear y asignar permisos en HDFS
-hdfs dfs -mkdir -p hdfs://namenode/user/hive
-hdfs dfs -chown hive hdfs://namenode/user/hive
-hdfs dfs -mkdir -p hdfs://namenode/user/hive/warehouse
-hdfs dfs -chown hive hdfs://namenode/user/hive/warehouse
-hdfs dfs -mkdir -p hdfs://namenode/home/hive
-hdfs dfs -chown hive hdfs://namenode/home/hive
-
-# Crear directorio en HDFS
-hdfs dfs -mkdir -p hdfs://namenode/user/hive/userdata/
-hdfs dfs -chown hive hdfs://namenode/user/hive/userdata/
-hdfs dfs -mkdir -p hdfs://namenode/user/hive/estructura/
-hdfs dfs -chown hive hdfs://namenode/user/hive/estructura/
-
-echo "Uploading data to hdfs..."
-
-# Subir archivos AVRO a HDFS
-hadoop fs -mkdir -p /user/hive/warehouse/usuarios
-hadoop fs -put /data/userdata/*.avro /user/hive/warehouse/usuarios/
-hadoop fs -chmod -R 777 /user/hive/warehouse/usuarios
-hdfs dfs -put /estructura/* hdfs://namenode/user/hive/estructura/
-
-echo "✅ Datos AVRO cargados en HDFS correctamente."
+hdfs dfs -mkdir -p /user/hive
+hdfs dfs -chown hive /user/hive
+hdfs dfs -mkdir -p /user/hive/warehouse
+hdfs dfs -chown hive /user/hive/warehouse
+hdfs dfs -mkdir -p /home/hive
+hdfs dfs -chown hive /home/hive
+# Crear directorio en HDFS para los datos
+hdfs dfs -mkdir -p /user/hive/warehouse/usuarios
+echo "Uploading data to HDFS..."
+# Subir archivos AVRO a HDFS uno por uno
+hdfs dfs -put /data/userdata/userdata1.avro /user/hive/warehouse/usuarios/
+hdfs dfs -put /data/userdata/userdata2.avro /user/hive/warehouse/usuarios/
+hdfs dfs -put /data/userdata/userdata3.avro /user/hive/warehouse/usuarios/
+hdfs dfs -put /data/userdata/userdata4.avro /user/hive/warehouse/usuarios/
+hdfs dfs -put /data/userdata/userdata5.avro /user/hive/warehouse/usuarios/
+# Subir el esquema AVRO a HDFS
+hdfs dfs -put /data/userdata/userdata.avsc /user/hive/warehouse/usuarios/
+# Ajustar permisos
+hdfs dfs -chmod -R 777 /user/hive/warehouse/usuarios
+echo "✅ Datos AVRO y esquema cargados en HDFS correctamente."

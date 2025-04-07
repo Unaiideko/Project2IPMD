@@ -9,7 +9,6 @@ services:
     environment:
       - ENSURE_NAMENODE_DIR=true
     volumes:
-      - ./data/namenode:/hadoop/dfs/name
       - ./config/core-site.xml:/opt/hadoop/etc/hadoop/core-site.xml
       - ./config/hdfs-site.xml:/opt/hadoop/etc/hadoop/hdfs-site.xml
       - ./scripts:/scripts
@@ -63,7 +62,6 @@ services:
   #     - hadoop
 
   hive:
-
     image: apache/hive:3.1.3
     container_name: hive
     environment:
@@ -75,6 +73,9 @@ services:
     ports:
       - "10000:10000"
       - "10002:10002"
+    volumes:
+      - ./userdata:/data/userdata
+      - ./scripts:/scripts
     networks:
       - hadoop
 
@@ -92,18 +93,18 @@ services:
     networks:
       - hadoop
 
-  # grafana:
-  #   image: grafana/grafana:latest
-  #   container_name: grafana
-  #   ports:
-  #     - "3000:3000"
-  #   environment:
-  #     - GF_SECURITY_ADMIN_USER=admin
-  #     - GF_SECURITY_ADMIN_PASSWORD=admin
-  #   depends_on:
-  #     - mysql
-  #   networks:
-  #     - hadoop
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    depends_on:
+      - mysql
+    networks:
+      - hadoop
 
 networks:
   hadoop:
