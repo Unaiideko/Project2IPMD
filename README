@@ -7,7 +7,7 @@ En un inicio, se deslegarán los servicios necesarios para la práctica por medi
 Tras el despliegue, se habrá de abrir un bash en el contenedor de Hive usando Beeline, de la siguiente manera: 
 ```
 >>>docker exec -it namenode /scripts/init-hdfs.sh
-
+##sed -i 's/\r$//' init-hdfs.sh  if neccesary
 docker cp ./config/hive-site.xml hive:/opt/hive/conf/hive-site.xml
 
 >>>docker exec -it hive beeline -u jdbc:hive2://localhost:10000/
