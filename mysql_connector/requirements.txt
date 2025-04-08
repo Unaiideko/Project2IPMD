@@ -2,3 +2,5 @@ mysql-connector-python
 PyHive
 thrift
 thrift_sasl
+hdfs
+fastavro

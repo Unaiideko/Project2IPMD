@@ -35,11 +35,14 @@ TBLPROPERTIES ('avro.schema.url'='hdfs://namenode/user/hive/schemas/userdata.avs
 >>>SELECT * FROM usuarios LIMIT 10;
 
 DROP TABLE IF EXISTS summary;
+
 CREATE EXTERNAL TABLE summary (
     country STRING,
     user_count BIGINT
 )
-STORED AS PARQUET
+ROW FORMAT DELIMITED
+FIELDS TERMINATED BY ','
+STORED AS TEXTFILE
 LOCATION 'hdfs://namenode/user/hive/summary';
 
 >>>INSERT OVERWRITE TABLE summary

@@ -5,7 +5,7 @@ WORKDIR /Project2IPMD/mysql_connector
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY ./app.py ./app.py
-RUN chmod +x app.py
+COPY ./main.py ./main.py
+RUN chmod +x main.py
 
-CMD [ "python", "./app.py" ]
+CMD [ "python", "./main.py" ]

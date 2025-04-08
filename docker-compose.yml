@@ -42,7 +42,7 @@ services:
     volumes:
       - ./userdata:/data/userdata
       - ./scripts:/scripts
-      - ./config/core-site.xml:/opt/hadoop/etc/hadoop/core-site.xml
+      #- ./config/core-site.xml:/opt/hadoop/etc/hadoop/core-site.xml
     networks:
       - hadoop
 
