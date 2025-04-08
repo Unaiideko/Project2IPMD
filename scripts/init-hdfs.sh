@@ -13,9 +13,20 @@ hdfs dfs -mkdir -p /user/hive/schemas
 # Subir el archivo userdata.avsc al directorio de esquemas en HDFS
 hdfs dfs -put /scripts/userdata.avsc /user/hive/schemas/
 
-# Verificar que los archivos se hayan cargado correctamente
+# Crear directorio en HDFS para la tabla summary
+hdfs dfs -mkdir -p /user/hive/summary
+
+# Asignar permisos adecuados a los directorios
+hdfs dfs -chmod -R 777 /user/hive/warehouse/usuarios
+hdfs dfs -chmod -R 777 /user/hive/schemas
+hdfs dfs -chmod -R 777 /user/hive/summary
+
+# Verificar que los archivos y directorios se hayan creado correctamente
 echo "Archivos en /user/hive/warehouse/usuarios:"
 hdfs dfs -ls /user/hive/warehouse/usuarios
 
 echo "Archivos en /user/hive/schemas:"
 hdfs dfs -ls /user/hive/schemas
+
+echo "Directorio para summary en /user/hive/summary:"
+hdfs dfs -ls /user/hive/summary

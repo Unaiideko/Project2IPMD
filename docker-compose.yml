@@ -58,7 +58,18 @@ services:
       - "3306:3306"
     networks:
       - hadoop
-
+  
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"  # Puerto para acceder a Grafana
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin  # Usuario administrador
+      - GF_SECURITY_ADMIN_PASSWORD=admin  # Contraseña administrador
+    networks:
+      - hadoop
+      
 networks:
   hadoop:
     driver: bridge

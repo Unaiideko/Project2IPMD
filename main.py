@@ -1,25 +1,26 @@
 from pyhive import hive
 import mysql.connector
-from collections import Counter
+from hdfs import InsecureClient
 
-# Conexión a Hive
-print("Conectando a Hive...")
-conn_hive = hive.Connection(host='hive_host', port=10000, username='hive_user', database='default')
-cursor_hive = conn_hive.cursor()
-cursor_hive.execute("SELECT country FROM usuarios")
+# Conexión a HDFS
+hdfs_client = InsecureClient('http://namenode:9870', user='hadoop')
 
-# Procesar los datos en Python
-print("Procesando datos desde Hive...")
-countries = [row[0] for row in cursor_hive.fetchall()]
-summary_data = Counter(countries).most_common(10)  # Obtener los 10 países con más usuarios
+# Leer los datos de HDFS
+print("Leyendo datos desde HDFS...")
+with hdfs_client.read('/user/hive/summary/000000_0') as reader:
+    data = reader.read().decode('utf-8').splitlines()
+
+# Procesar los datos
+print("Procesando datos...")
+summary_data = [line.split('\t') for line in data]  # Ajusta según el formato de los datos
 
 # Conexión a MySQL
 print("Conectando a MySQL...")
 conn_mysql = mysql.connector.connect(
-    host="mysql_host",
+    host="mysql",
     user="mysql_user",
-    password="mysql_password",
-    database="hive_summary"  # Asegúrate de que esta base de datos exista
+    password="grafana",
+    database="hive_summary"
 )
 cursor_mysql = conn_mysql.cursor()
 
@@ -35,14 +36,12 @@ cursor_mysql.execute("""
 # Insertar los datos en MySQL
 print("Insertando datos en MySQL...")
 for country, user_count in summary_data:
-    cursor_mysql.execute("INSERT INTO summary (country, user_count) VALUES (%s, %s)", (country, user_count))
+    cursor_mysql.execute("INSERT INTO summary (country, user_count) VALUES (%s, %s)", (country, int(user_count)))
 
 # Confirmar los cambios
 conn_mysql.commit()
 print("Datos volcados exitosamente en MySQL.")
 
 # Cerrar las conexiones
-cursor_hive.close()
-conn_hive.close()
 cursor_mysql.close()
 conn_mysql.close()

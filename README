@@ -28,21 +28,28 @@ docker cp ./config/hive-site.xml hive:/opt/hive/conf/hive-site.xml
     comments STRING
 )
 STORED AS AVRO
-LOCATION 'hdfs:///user/hive/warehouse/usuarios'
-TBLPROPERTIES ('avro.schema.url'='hdfs:///user/hive/schemas/userdata.avsc');
+LOCATION 'hdfs://namenode/user/hive/warehouse/usuarios'
+TBLPROPERTIES ('avro.schema.url'='hdfs://namenode/user/hive/schemas/userdata.avsc');
 
 #Comprobar que se hayan creado los datos
 >>>SELECT * FROM usuarios LIMIT 10;
 
+DROP TABLE IF EXISTS summary;
+CREATE EXTERNAL TABLE summary (
+    country STRING,
+    user_count BIGINT
+)
+STORED AS PARQUET
+LOCATION 'hdfs://namenode/user/hive/summary';
+
+>>>INSERT OVERWRITE TABLE summary
+SELECT country, COUNT(*) AS user_count
+FROM usuarios
+GROUP BY country;
+
+
 >>>docker exec -it mysql mysql -u root -p
 
->>>CREATE DATABASE hive_summary;
->>>use hive_summary;
->>>CREATE TABLE IF NOT EXISTS datos (
-    country VARCHAR(255),
-    user_count INT,
-    PRIMARY KEY (country)
-);
 
 >>>cd mysql_connector
 >>>docker build -t mysql_connector .
