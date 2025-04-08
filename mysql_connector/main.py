@@ -13,7 +13,7 @@ hdfs_client = InsecureClient('http://namenode:9870', user='hadoop')
 #     csv_data = reader.read()
 # Leer el archivo CSV desde HDFS
 print("Leyendo datos desde HDFS en formato CSV...")
-with hdfs_client.read('/user/impala/summary/9a45d1554556c7ef-df99997100000001_187404063_data.0.txt', encoding='utf-8') as reader:
+with hdfs_client.read('/user/impala/summary/2e41f8e7a62b9f81-49b9ead000000001_1827194456_data.0.txt', encoding='utf-8') as reader:
     csv_data = reader.read()
 
 # Procesar CSV
