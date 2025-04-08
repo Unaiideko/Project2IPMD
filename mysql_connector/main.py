@@ -7,10 +7,13 @@ import io
 
 # Conexión a HDFS
 hdfs_client = InsecureClient('http://namenode:9870', user='hadoop')
-
+# Lo conmentado es de la versión de hive
+# print("Leyendo datos desde HDFS en formato CSV...")
+# with hdfs_client.read('/user/hive/summary/000000_0', encoding='utf-8') as reader:
+#     csv_data = reader.read()
 # Leer el archivo CSV desde HDFS
 print("Leyendo datos desde HDFS en formato CSV...")
-with hdfs_client.read('/user/hive/summary/000000_0', encoding='utf-8') as reader:
+with hdfs_client.read('/user/impala/summary/9a45d1554556c7ef-df99997100000001_187404063_data.0.txt', encoding='utf-8') as reader:
     csv_data = reader.read()
 
 # Procesar CSV

@@ -7,11 +7,11 @@ En un inicio, se deslegarán los servicios necesarios para la práctica por medi
 Tras el despliegue, se habrá de abrir un bash en el contenedor de Hive usando Beeline, de la siguiente manera: 
 ```
 >>>docker exec -it namenode /scripts/init-hdfs.sh
+
 ##sed -i 's/\r$//' init-hdfs.sh  if neccesary
 docker cp ./config/hive-site.xml hive:/opt/hive/conf/hive-site.xml
 
 >>>docker exec -it hive beeline -u jdbc:hive2://localhost:10000/
-
 
 >>>CREATE EXTERNAL TABLE IF NOT EXISTS usuarios (
     id BIGINT,
@@ -78,5 +78,76 @@ Password: grafana (contraseña configurada en tu contenedor de MySQL).
 
 Dashboard>Add new panel
 
-Query>>> SELECT country, user_count FROM datos;
+Query>>> SELECT country, user_count FROM summary ORDER BY user_count DESC; 
 
+
+
+Versión Impala
+docker exec -it namenode /scripts/init-hdfs_imp.sh
+
+docker exec -it impala impala-shell -i impala:21050 
+connect;
+
+>>>CREATE EXTERNAL TABLE IF NOT EXISTS usuarios (
+    id BIGINT,
+    first_name STRING,
+    last_name STRING,
+    email STRING,
+    gender STRING,
+    ip_address STRING,
+    cc BIGINT,
+    country STRING,
+    birthdate STRING,
+    salary DOUBLE,
+    title STRING,
+    comments STRING
+)
+STORED AS AVRO
+LOCATION 'hdfs://namenode/user/impala/warehouse/usuarios'
+TBLPROPERTIES ('avro.schema.url'='hdfs://namenode/user/impala/schemas/userdata.avsc');
+
+CREATE EXTERNAL TABLE summary (
+    country STRING,
+    user_count BIGINT
+)
+ROW FORMAT DELIMITED
+FIELDS TERMINATED BY ','
+STORED AS TEXTFILE
+LOCATION 'hdfs://namenode/user/impala/summary';
+
+>>>INSERT OVERWRITE TABLE summary
+SELECT country, COUNT(*) AS user_count
+FROM usuarios
+GROUP BY country;
+
+>>>cd mysql_connector
+>>>docker build -t mysql_connector .
+>>>docker run --name=ejecutor --network=project2ipmd_hadoop -e MYSQL_HOST=mysql mysql_connector
+si al ejecutar el ejecutor salta un errorF "File /user/impala/summary/000000_0 not found."
+Ejecutar docker exec -it namenode hdfs dfs -ls /user/impala/summary 
+salida:
+Found 2 items
+-rw-r--r--   3 impala supergroup       2468 2025-04-08 19:36 /user/impala/summary/9a45d1554556c7ef-df99997100000001_187404063_data.0.txt
+drwxrwxrwx   - impala supergroup          0 2025-04-08 19:36 /user/impala/summary/_impala_insert_staging
+copiar en nombre /user/impala/summary/9a45d1554556c7ef-df99997100000001_187404063_data.0.txt a
+with hdfs_client.read('/user/impala/summary/9a45d1554556c7ef-df99997100000001_187404063_data.0.txt', encoding='utf-8') as reader: linea 13 del main.py
+volver a ejecutar docker build -t mysql_connector . y docker run --name=ejecutor --network=project2ipmd_hadoop -e MYSQL_HOST=mysql mysql_connector
+
+Acceder a internet: http://localhost:3000
+
+user & pass= admin
+
+>>>Engranaje y add data source
+
+Host: mysql:3306 (esto hace referencia al contenedor MySQL en tu red Docker).
+
+Database: hive_summary (el nombre de la base de datos que creaste anteriormente).
+
+User: grafana (usuario configurado en tu contenedor de MySQL).
+
+Password: grafana (contraseña configurada en tu contenedor de MySQL).
+
+
+Dashboard>Add new panel
+
+Query>>> SELECT country, user_count FROM summary ORDER BY user_count DESC; 
